@@ -3,7 +3,7 @@ if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 cmake_minimum_required(VERSION 3.0.0)
-project(SDL2 C CXX)
+project(SDL2 C)
 
 if(WINDOWS_STORE)
   cmake_minimum_required(VERSION 3.11)
@@ -1038,6 +1038,10 @@ if(ANDROID)
   endif()
   if(SDL_JOYSTICK)
     CheckHIDAPI()
+    if(HAVE_HIDAPI)
+      enable_language(CXX)
+      set(SOURCE_FILES ${SOURCE_FILES} ${SDL2_SOURCE_DIR}/src/hidapi/android/hid.cpp)
+    endif()
     set(SDL_JOYSTICK_ANDROID 1)
     file(GLOB ANDROID_JOYSTICK_SOURCES ${SDL2_SOURCE_DIR}/src/joystick/android/*.c ${SDL2_SOURCE_DIR}/src/joystick/steam/*.c)
     set(SOURCE_FILES ${SOURCE_FILES} ${ANDROID_JOYSTICK_SOURCES})
@@ -1086,10 +1090,6 @@ if(ANDROID)
     find_library(ANDROID_LIBRARY_LIBRARY android)
     list(APPEND EXTRA_LIBS ${ANDROID_DL_LIBRARY} ${ANDROID_LOG_LIBRARY} ${ANDROID_LIBRARY_LIBRARY})
     add_definitions(-DGL_GLEXT_PROTOTYPES)
-
-    if (HAVE_HIDAPI)
-        list(APPEND EXTRA_LIBS hidapi)
-    endif()
 
     #enable gles
     if(VIDEO_OPENGLES)
@@ -2607,10 +2607,6 @@ if (NOT ANDROID)
 endif()
 endif()
 
-if (ANDROID AND HAVE_HIDAPI)
-  set(_INSTALL_LIBS ${_INSTALL_LIBS} "hidapi")
-endif()
-
 if(SDL_SHARED)
   add_library(SDL2 SHARED ${SOURCE_FILES} ${VERSION_SOURCES})
   # alias target for in-tree builds
@@ -2652,24 +2648,6 @@ if(SDL_SHARED)
   endif()
   if(IOS OR TVOS)
     set_property(TARGET SDL2 APPEND_STRING PROPERTY COMPILE_FLAGS "-fobjc-arc")
-  endif()
-endif()
-
-if(ANDROID)
-  if(HAVE_HIDAPI)
-    add_library(hidapi SHARED ${SDL2_SOURCE_DIR}/src/hidapi/android/hid.cpp)
-    # alias target for in-tree builds
-    add_library(SDL2::hidapi ALIAS hidapi)
-  endif()
-
-  if(MSVC AND NOT LIBC)
-    # Don't try to link with the default set of libraries.
-    set_target_properties(hidapi PROPERTIES LINK_FLAGS_RELEASE "/NODEFAULTLIB")
-    set_target_properties(hidapi PROPERTIES LINK_FLAGS_DEBUG "/NODEFAULTLIB")
-    set_target_properties(hidapi PROPERTIES STATIC_LIBRARY_FLAGS "/NODEFAULTLIB")
-  endif()
-  if(HAVE_HIDAPI)
-    target_link_libraries(hidapi log)
   endif()
 endif()
 
