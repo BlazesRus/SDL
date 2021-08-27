@@ -2,12 +2,12 @@ package org.libsdl.app;
 
 import android.content.Context;
 
-import java.lang.Class;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
-    SDL library initialization
-*/
+ * SDL library initialization
+ */
 public class SDL {
 
     // This function should be called first and sets up the native code
@@ -61,23 +61,14 @@ public class SDL {
             // they've changed during updates.
             Method forceMethod = relinkClass.getDeclaredMethod("force");
             Object relinkInstance = forceMethod.invoke(null);
-            Class<?> relinkInstanceClass = relinkInstance.getClass();
+            Class<?> relinkInstanceClass = Objects.requireNonNull(relinkInstance).getClass();
 
             // Actually load the library!
             Method loadMethod = relinkInstanceClass.getDeclaredMethod("loadLibrary", contextClass, stringClass, stringClass, relinkListenerClass);
             loadMethod.invoke(relinkInstance, mContext, libraryName, null, null);
-        }
-        catch (final Throwable e) {
+        } catch (final Throwable e) {
             // Fall back
-            try {
-                System.loadLibrary(libraryName);
-            }
-            catch (final UnsatisfiedLinkError ule) {
-                throw ule;
-            }
-            catch (final SecurityException se) {
-                throw se;
-            }
+            System.loadLibrary(libraryName);
         }
     }
 
