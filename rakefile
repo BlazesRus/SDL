@@ -1,0 +1,218 @@
+#
+# Copyright (c) 2021 Yao Wei Tjong. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+
+task default: :build
+
+desc 'Invoke CMake to configure and generate a build tree'
+task :cmake => [:init] do
+  if ENV['CI']
+    system 'cmake --version' or abort 'Failed to find CMake'
+    if ENV['USE_CCACHE'] && /\[cache clear\]/ =~ `git log --format=%B -n1 2>/dev/null`
+      system 'bash', '-c', 'rm -rf ~/.{cache,gradle}' or abort 'Failed to clear the build cache'
+    end
+  end
+  next if ENV['PLATFORM'] == 'android' || (Dir.exists?(build_tree) and not ARGV.include?('cmake'))
+  system %Q{cmake -B "#{build_tree}"} or abort
+end
+
+desc 'Clean the build tree'
+task :clean => [:init] do
+  if ENV['PLATFORM'] == 'android'
+    Rake::Task[:gradle].invoke('clean')
+    next
+  end
+  system build_target('clean') or abort
+end
+
+desc 'Build the software'
+task :build, [:target] => [:cmake] do |_, args|
+  system "ccache -z" if ENV['USE_CCACHE']
+  if ENV['PLATFORM'] == 'android'
+    Rake::Task[:gradle].invoke('build -x test')
+    system "ccache -s" if ENV['USE_CCACHE']
+    next
+  end
+  filter = ''
+  case generator_id
+  when /Ninja/
+    concurrent = '' # Ninja defaults to running commands in parallel anyway
+  when /VisualStudio/
+    concurrent = '/maxCpuCount'
+  when /Xcode/
+    concurrent = '' # Assume xcodebuild will do the right things without the '-jobs'
+    filter = '|xcpretty -c && exit ${PIPESTATUS[0]}' if system('xcpretty -v >/dev/null 2>&1')
+  else
+    concurrent = "-j #{$max_jobs}"
+  end
+  system "#{build_target(args[:target])} -- #{concurrent} #{ENV['BUILD_PARAMS']} #{filter}" or abort
+  system "ccache -s" if ENV['USE_CCACHE']
+end
+
+desc 'Test the software'
+task :test => [:init] do
+  if ENV['PLATFORM'] == 'android'
+    Rake::Task[:gradle].invoke('test')
+    next
+  end
+  wrapper = ENV['CI'] && ENV['PLATFORM'] == 'linux' ? 'xvfb-run' : ''
+  test = /Xcode/ =~ generator_id ? 'RUN_TESTS' : 'test'
+  system build_target(test, wrapper) or abort
+end
+
+### Internal tasks ###
+
+task :ci do
+  platform_modifier = /(.+?)-(.+)/.match(ENV['PLATFORM'])
+  if platform_modifier
+    ENV['PLATFORM'] = platform_modifier[1]
+    ENV['MODIFIER'] = platform_modifier[2]
+  end
+  case ENV['HOST']
+  when 'linux'
+    if ENV['MODIFIER'] == 'clang'
+      ENV['CC'] = 'clang'
+    end
+  when 'macOS'
+    if ENV['MODIFIER'] == 'ninja'
+      ENV['CMAKE_GENERATOR'] = 'Ninja Multi-Config'
+    end
+  when 'windows'
+    if ENV['MODIFIER'] == 'gcc'
+      ENV['CMAKE_GENERATOR'] = 'MinGW Makefiles'
+    end
+  else
+    # Do nothing
+  end
+  ENV['BUILD_TREE'] = 'build/ci'
+end
+
+task :gradle, [:task] do |_, args|
+  system "#{ENV['OS'] ? 'gradlew.bat' : './gradlew'} #{args[:task]} #{ENV['CI'] && '--console plain'}" or abort
+end
+
+task :init do
+  next if $max_jobs
+  Rake::Task[:ci].invoke if ENV['CI']
+  case build_host
+  when /linux/
+    $max_jobs = `grep -c processor /proc/cpuinfo`.chomp unless $max_jobs
+    ENV['CMAKE_GENERATOR'] = 'Ninja Multi-Config' unless ENV['CMAKE_GENERATOR']
+    unless ENV['PLATFORM']
+      if /x86/ =~ `uname -m`
+        ENV['PLATFORM'] = 'linux'
+      elsif Dir.exists?('/opt/vc')
+        ENV['PLATFORM'] = 'rpi'
+      else
+        ENV['PLATFORM'] = 'arm'
+      end
+    end
+  when /darwin|macOS/
+    $max_jobs = `sysctl -n hw.logicalcpu`.chomp unless $max_jobs
+    ENV['CMAKE_GENERATOR'] = 'Xcode' unless ENV['CMAKE_GENERATOR']
+    ENV['PLATFORM'] = 'macOS' unless ENV['PLATFORM']
+  when /win32|mingw|mswin|windows/
+    unless $max_jobs
+      require 'win32ole'
+      WIN32OLE.connect('winmgmts://').ExecQuery("select NumberOfLogicalProcessors from Win32_ComputerSystem").each { |it|
+        $max_jobs = it.NumberOfLogicalProcessors
+      }
+    end
+    ENV['CMAKE_GENERATOR'] = 'Visual Studio 16 2019' unless ENV['CMAKE_GENERATOR']
+    ENV['PLATFORM'] = 'win' unless ENV['PLATFORM']
+  else
+    abort "Unsupported host system: #{build_host}"
+  end
+  ENV['CMAKE_TOOLCHAIN_FILE'] = "cmake/toolchains/#{toolchain_map[ENV['PLATFORM']]}.cmake" if toolchain_map.key?(ENV['PLATFORM'])
+  if /32/ =~ ENV['ARCH']
+    case generator_id
+    when /Ninja|MinGW/
+      ENV['CFLAGS'] = '-m32'
+    when /VisualStudio/
+      ENV['CMAKE_GENERATOR_PLATFORM'] = 'Win32'
+    end
+  end
+end
+
+task :parse, [:key, :value] do |_, args|
+  abort %q{Usage: parse[key,'space-separated values']} unless args[:key]
+  args.with_defaults(:value => '')
+  require 'json'
+  puts "::set-output name=#{args[:key]}::#{args[:value].split.to_json}"
+end
+
+task :source_checksum do
+  require 'digest'
+  sha256_final = Digest::SHA256.new
+  sha256_iter = Digest::SHA256
+  Dir['src/**/*.{c,h,m}', 'include/**/*.h', 'CMakeLists.txt'].each { |it| sha256_final << sha256_iter.file(it).hexdigest }
+  puts "::set-output name=hexdigest::#{sha256_final.hexdigest}"
+end
+
+task :update_dot_files do
+  system 'bash', '-c', %q{
+    cat <(perl -ne 'while (/([A-Z_]+):.+?/g) {print "$1\n"}' .github/workflows/ci.yml) \
+        <(perl -ne 'while (/ENV(?:\[|\.fetch\()\x27(\w+)\x27(?:\]|,)/g) {print "$1\n"}' rakefile) \
+      |sort |uniq |grep -Ev '^(HOME|PATH)$' >build-scripts/.env-file
+  } or abort 'Failed to update dot files'
+end
+
+### Internal methods ###
+
+def build_host
+  ENV['HOST'] || RUBY_PLATFORM
+end
+
+def build_tree
+  ENV['BUILD_TREE'] || "build/#{dockerized? ? 'dockerized-' : ''}#{default_path}"
+end
+
+def build_config
+  /NinjaMultiConfig|VisualStudio|Xcode/ =~ generator_id ? "--config #{ENV.fetch('CONFIG', 'Release')}" : ''
+end
+
+def build_target(tgt, wrapper = '')
+  %Q{#{wrapper} cmake --build "#{build_tree}" #{build_config} #{tgt && "--target #{tgt}"}}
+end
+
+def default_path
+  "#{ENV['PLATFORM'].downcase}" \
+  "#{ENV['CC'] && "-#{ENV['CC']}"}" \
+  "-#{generator_id}" \
+  "#{/32/ =~ ENV['ARCH'] && '-32'}"
+end
+
+def dockerized?
+  File.exists?('/entrypoint.sh')
+end
+
+def generator_id
+  ENV.fetch('CMAKE_GENERATOR', '').gsub(/ |-|\d{4}/, '')
+end
+
+def toolchain_map
+  {
+    'mingw' => 'MinGW',
+    'web' => 'Emscripten',
+  }
+end
+
+# vi: set ts=2 sw=2 expandtab:

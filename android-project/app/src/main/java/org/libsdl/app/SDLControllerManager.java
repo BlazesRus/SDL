@@ -1,10 +1,7 @@
 package org.libsdl.app;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.VibrationEffect;
@@ -15,10 +12,13 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
-public class SDLControllerManager
-{
-
+@SuppressLint("ObsoleteSdkInt")
+public class SDLControllerManager {
     public static native int nativeSetupJNI();
 
     public static native int nativeAddJoystick(int device_id, String name, String desc,
@@ -87,8 +87,7 @@ public class SDLControllerManager
     /**
      * This method is called by SDL using JNI.
      */
-    public static void hapticStop(int device_id)
-    {
+    public static void hapticStop(int device_id) {
         mHapticHandler.stop(device_id);
     }
 
@@ -96,7 +95,7 @@ public class SDLControllerManager
     public static boolean isDeviceSDLJoystick(int deviceId) {
         InputDevice device = InputDevice.getDevice(deviceId);
         // We cannot use InputDevice.isVirtual before API 16, so let's accept
-        // only nonnegative device ids (VIRTUAL_KEYBOARD equals -1)
+        // only non-negative device ids (VIRTUAL_KEYBOARD equals -1)
         if ((device == null) || (deviceId < 0)) {
             return false;
         }
@@ -127,6 +126,7 @@ class SDLJoystickHandler {
 
     /**
      * Handles given MotionEvent.
+     *
      * @param event the event to be handled.
      * @return if given event was processed.
      */
@@ -151,6 +151,7 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
         public ArrayList<InputDevice.MotionRange> axes;
         public ArrayList<InputDevice.MotionRange> hats;
     }
+
     static class RangeComparator implements Comparator<InputDevice.MotionRange> {
         @Override
         public int compare(InputDevice.MotionRange arg0, InputDevice.MotionRange arg1) {
@@ -175,8 +176,7 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
     private final ArrayList<SDLJoystick> mJoysticks;
 
     public SDLJoystickHandler_API16() {
-
-        mJoysticks = new ArrayList<SDLJoystick>();
+        mJoysticks = new ArrayList<>();
     }
 
     @Override
@@ -192,8 +192,8 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
                     joystick.device_id = device_id;
                     joystick.name = joystickDevice.getName();
                     joystick.desc = getJoystickDescriptor(joystickDevice);
-                    joystick.axes = new ArrayList<InputDevice.MotionRange>();
-                    joystick.hats = new ArrayList<InputDevice.MotionRange>();
+                    joystick.axes = new ArrayList<>();
+                    joystick.hats = new ArrayList<>();
 
                     List<InputDevice.MotionRange> ranges = joystickDevice.getMotionRanges();
                     Collections.sort(ranges, new RangeComparator());
@@ -210,7 +210,7 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
                     mJoysticks.add(joystick);
                     SDLControllerManager.nativeAddJoystick(joystick.device_id, joystick.name, joystick.desc,
                             getVendorId(joystickDevice), getProductId(joystickDevice), false,
-                            getButtonMask(joystickDevice), joystick.axes.size(), joystick.hats.size()/2, 0);
+                            getButtonMask(joystickDevice), joystick.axes.size(), joystick.hats.size() / 2, 0);
                 }
             }
         }
@@ -225,7 +225,7 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
             }
             if (i == deviceIds.length) {
                 if (removedDevices == null) {
-                    removedDevices = new ArrayList<Integer>();
+                    removedDevices = new ArrayList<>();
                 }
                 removedDevices.add(device_id);
             }
@@ -285,17 +285,21 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
 
         return joystickDevice.getName();
     }
+
     public int getProductId(InputDevice joystickDevice) {
         return 0;
     }
+
     public int getVendorId(InputDevice joystickDevice) {
         return 0;
     }
+
     public int getButtonMask(InputDevice joystickDevice) {
         return -1;
     }
 }
 
+@TargetApi(Build.VERSION_CODES.KITKAT)
 class SDLJoystickHandler_API19 extends SDLJoystickHandler_API16 {
 
     @Override
@@ -331,27 +335,27 @@ class SDLJoystickHandler_API19 extends SDLJoystickHandler_API16 {
             KeyEvent.KEYCODE_BUTTON_SELECT,
             KeyEvent.KEYCODE_DPAD_CENTER,
 
-            // These don't map into any SDL controller buttons directly
-            KeyEvent.KEYCODE_BUTTON_L2,
-            KeyEvent.KEYCODE_BUTTON_R2,
-            KeyEvent.KEYCODE_BUTTON_C,
-            KeyEvent.KEYCODE_BUTTON_Z,
-            KeyEvent.KEYCODE_BUTTON_1,
-            KeyEvent.KEYCODE_BUTTON_2,
-            KeyEvent.KEYCODE_BUTTON_3,
-            KeyEvent.KEYCODE_BUTTON_4,
-            KeyEvent.KEYCODE_BUTTON_5,
-            KeyEvent.KEYCODE_BUTTON_6,
-            KeyEvent.KEYCODE_BUTTON_7,
-            KeyEvent.KEYCODE_BUTTON_8,
-            KeyEvent.KEYCODE_BUTTON_9,
-            KeyEvent.KEYCODE_BUTTON_10,
-            KeyEvent.KEYCODE_BUTTON_11,
-            KeyEvent.KEYCODE_BUTTON_12,
-            KeyEvent.KEYCODE_BUTTON_13,
-            KeyEvent.KEYCODE_BUTTON_14,
-            KeyEvent.KEYCODE_BUTTON_15,
-            KeyEvent.KEYCODE_BUTTON_16,
+                // These don't map into any SDL controller buttons directly
+                KeyEvent.KEYCODE_BUTTON_L2,
+                KeyEvent.KEYCODE_BUTTON_R2,
+                KeyEvent.KEYCODE_BUTTON_C,
+                KeyEvent.KEYCODE_BUTTON_Z,
+                KeyEvent.KEYCODE_BUTTON_1,
+                KeyEvent.KEYCODE_BUTTON_2,
+                KeyEvent.KEYCODE_BUTTON_3,
+                KeyEvent.KEYCODE_BUTTON_4,
+                KeyEvent.KEYCODE_BUTTON_5,
+                KeyEvent.KEYCODE_BUTTON_6,
+                KeyEvent.KEYCODE_BUTTON_7,
+                KeyEvent.KEYCODE_BUTTON_8,
+                KeyEvent.KEYCODE_BUTTON_9,
+                KeyEvent.KEYCODE_BUTTON_10,
+                KeyEvent.KEYCODE_BUTTON_11,
+                KeyEvent.KEYCODE_BUTTON_12,
+                KeyEvent.KEYCODE_BUTTON_13,
+                KeyEvent.KEYCODE_BUTTON_14,
+                KeyEvent.KEYCODE_BUTTON_15,
+                KeyEvent.KEYCODE_BUTTON_16,
         };
         int[] masks = new int[] {
             (1 << 0),   // A -> A
@@ -404,6 +408,7 @@ class SDLJoystickHandler_API19 extends SDLJoystickHandler_API16 {
     }
 }
 
+@TargetApi(Build.VERSION_CODES.O)
 class SDLHapticHandler_API26 extends SDLHapticHandler {
     @Override
     public void run(int device_id, float intensity, int length) {
@@ -426,8 +431,7 @@ class SDLHapticHandler_API26 extends SDLHapticHandler {
             }
             try {
                 haptic.vib.vibrate(VibrationEffect.createOneShot(length, vibeValue));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 // Fall back to the generic method, which uses DEFAULT_AMPLITUDE, but works even if
                 // something went horribly wrong with the Android 8.0 APIs.
                 haptic.vib.vibrate(length);
@@ -447,7 +451,7 @@ class SDLHapticHandler {
     private final ArrayList<SDLHaptic> mHaptics;
 
     public SDLHapticHandler() {
-        mHaptics = new ArrayList<SDLHaptic>();
+        mHaptics = new ArrayList<>();
     }
 
     public void run(int device_id, float intensity, int length) {
@@ -521,7 +525,7 @@ class SDLHapticHandler {
             if (device_id != deviceId_VIBRATOR_SERVICE || !hasVibratorService) {
                 if (i == deviceIds.length) {
                     if (removedDevices == null) {
-                        removedDevices = new ArrayList<Integer>();
+                        removedDevices = new ArrayList<>();
                     }
                     removedDevices.add(device_id);
                 }
@@ -558,7 +562,7 @@ class SDLGenericMotionListener_API12 implements View.OnGenericMotionListener {
         float x, y;
         int action;
 
-        switch ( event.getSource() ) {
+        switch (event.getSource()) {
             case InputDevice.SOURCE_JOYSTICK:
                 return SDLControllerManager.handleJoystickMotionEvent(event);
 
@@ -603,9 +607,7 @@ class SDLGenericMotionListener_API12 implements View.OnGenericMotionListener {
         return false;
     }
 
-    public void reclaimRelativeMouseModeIfNeeded()
-    {
-
+    public void reclaimRelativeMouseModeIfNeeded() {
     }
 
     public float getEventX(MotionEvent event) {
@@ -618,6 +620,7 @@ class SDLGenericMotionListener_API12 implements View.OnGenericMotionListener {
 
 }
 
+@TargetApi(Build.VERSION_CODES.N)
 class SDLGenericMotionListener_API24 extends SDLGenericMotionListener_API12 {
     // Generic Motion (mouse hover, joystick...) events go here
 
@@ -678,6 +681,7 @@ class SDLGenericMotionListener_API24 extends SDLGenericMotionListener_API12 {
     }
 }
 
+@TargetApi(Build.VERSION_CODES.O)
 class SDLGenericMotionListener_API26 extends SDLGenericMotionListener_API24 {
     // Generic Motion (mouse hover, joystick...) events go here
     private boolean mRelativeModeEnabled;
@@ -687,12 +691,12 @@ class SDLGenericMotionListener_API26 extends SDLGenericMotionListener_API24 {
         float x, y;
         int action;
 
-        switch ( event.getSource() ) {
+        switch (event.getSource()) {
             case InputDevice.SOURCE_JOYSTICK:
                 return SDLControllerManager.handleJoystickMotionEvent(event);
 
             case InputDevice.SOURCE_MOUSE:
-            // DeX desktop mouse cursor is a separate non-standard input type.
+                // DeX desktop mouse cursor is a separate non-standard input type.
             case InputDevice.SOURCE_MOUSE | InputDevice.SOURCE_TOUCHSCREEN:
                 action = event.getActionMasked();
                 switch (action) {
@@ -767,8 +771,7 @@ class SDLGenericMotionListener_API26 extends SDLGenericMotionListener_API24 {
     }
 
     @Override
-    public void reclaimRelativeMouseModeIfNeeded()
-    {
+    public void reclaimRelativeMouseModeIfNeeded() {
         if (mRelativeModeEnabled && !SDLActivity.isDeXMode()) {
             SDLActivity.getContentView().requestPointerCapture();
         }

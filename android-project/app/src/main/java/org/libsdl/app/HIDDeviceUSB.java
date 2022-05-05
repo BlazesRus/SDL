@@ -1,10 +1,17 @@
 package org.libsdl.app;
 
-import android.hardware.usb.*;
+import android.annotation.SuppressLint;
+import android.hardware.usb.UsbConstants;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
 import android.os.Build;
 import android.util.Log;
+
 import java.util.Arrays;
 
+@SuppressLint("ObsoleteSdkInt")
 class HIDDeviceUSB implements HIDDevice {
 
     private static final String TAG = "hidapi";
@@ -30,6 +37,7 @@ class HIDDeviceUSB implements HIDDevice {
         mRunning = false;
     }
 
+    @SuppressLint("DefaultLocale")
     public String getIdentifier() {
         return String.format("%s/%x/%x/%d", mDevice.getDeviceName(), mDevice.getVendorId(), mDevice.getProductId(), mInterfaceIndex);
     }
@@ -55,8 +63,7 @@ class HIDDeviceUSB implements HIDDevice {
         if (Build.VERSION.SDK_INT >= 21) {
             try {
                 result = mDevice.getSerialNumber();
-            }
-            catch (SecurityException exception) {
+            } catch (SecurityException exception) {
                 //Log.w(TAG, "App permissions mean we cannot get serial number for device " + getDeviceName() + " message: " + exception.getMessage());
             }
         }
@@ -124,16 +131,16 @@ class HIDDeviceUSB implements HIDDevice {
         for (int j = 0; j < iface.getEndpointCount(); j++) {
             UsbEndpoint endpt = iface.getEndpoint(j);
             switch (endpt.getDirection()) {
-            case UsbConstants.USB_DIR_IN:
-                if (mInputEndpoint == null) {
-                    mInputEndpoint = endpt;
-                }
-                break;
-            case UsbConstants.USB_DIR_OUT:
-                if (mOutputEndpoint == null) {
-                    mOutputEndpoint = endpt;
-                }
-                break;
+                case UsbConstants.USB_DIR_IN:
+                    if (mInputEndpoint == null) {
+                        mInputEndpoint = endpt;
+                    }
+                    break;
+                case UsbConstants.USB_DIR_OUT:
+                    if (mOutputEndpoint == null) {
+                        mOutputEndpoint = endpt;
+                    }
+                    break;
             }
         }
 
@@ -166,13 +173,15 @@ class HIDDeviceUSB implements HIDDevice {
             skipped_report_id = true;
         }
 
-        res = mConnection.controlTransfer(
-            UsbConstants.USB_TYPE_CLASS | 0x01 /*RECIPIENT_INTERFACE*/ | UsbConstants.USB_DIR_OUT,
-            0x09/*HID set_report*/,
-            (3/*HID feature*/ << 8) | report_number,
-            mInterface,
-            report, offset, length,
-            1000/*timeout millis*/);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            res = mConnection.controlTransfer(
+                    UsbConstants.USB_TYPE_CLASS | 0x01 /*RECIPIENT_INTERFACE*/ | UsbConstants.USB_DIR_OUT,
+                    0x09/*HID set_report*/,
+                    (3/*HID feature*/ << 8) | report_number,
+                    mInterface,
+                    report, offset, length,
+                    1000/*timeout millis*/);
+        }
 
         if (res < 0) {
             Log.w(TAG, "sendFeatureReport() returned " + res + " on device " + getDeviceName());
@@ -210,13 +219,15 @@ class HIDDeviceUSB implements HIDDevice {
             skipped_report_id = true;
         }
 
-        res = mConnection.controlTransfer(
-            UsbConstants.USB_TYPE_CLASS | 0x01 /*RECIPIENT_INTERFACE*/ | UsbConstants.USB_DIR_IN,
-            0x01/*HID get_report*/,
-            (3/*HID feature*/ << 8) | report_number,
-            mInterface,
-            report, offset, length,
-            1000/*timeout millis*/);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            res = mConnection.controlTransfer(
+                    UsbConstants.USB_TYPE_CLASS | 0x01 /*RECIPIENT_INTERFACE*/ | UsbConstants.USB_DIR_IN,
+                    0x01/*HID get_report*/,
+                    (3/*HID feature*/ << 8) | report_number,
+                    mInterface,
+                    report, offset, length,
+                    1000/*timeout millis*/);
+        }
 
         if (res < 0) {
             Log.w(TAG, "getFeatureReport() returned " + res + " on device " + getDeviceName());
@@ -279,18 +290,15 @@ class HIDDeviceUSB implements HIDDevice {
             byte[] packet = new byte[packetSize];
             while (mRunning) {
                 int r;
-                try
-                {
+                try {
                     r = mConnection.bulkTransfer(mInputEndpoint, packet, packetSize, 1000);
-                }
-                catch (Exception e)
-                {
-                    Log.v(TAG, "Exception in UsbDeviceConnection bulktransfer: " + e);
+                } catch (Exception e) {
+                    Log.v(TAG, "Exception in UsbDeviceConnection bulkTransfer: " + e);
                     break;
                 }
-                if (r < 0) {
-                    // Could be a timeout or an I/O error
-                }
+                //if (r < 0) {
+                // Could be a timeout or an I/O error
+                //}
                 if (r > 0) {
                     byte[] data;
                     if (r == packetSize) {
