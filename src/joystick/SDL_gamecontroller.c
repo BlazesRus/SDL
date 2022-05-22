@@ -696,19 +696,20 @@ static ControllerMapping_t *SDL_PrivateGetControllerMappingForGUID(SDL_JoystickG
             return s_pXInputMapping;
         }
 #endif
+        if (!mapping) {
+            if (SDL_IsJoystickHIDAPI(guid)) {
+                mapping = SDL_CreateMappingForHIDAPIController(guid);
+            } else if (SDL_IsJoystickRAWINPUT(guid)) {
+                mapping = SDL_CreateMappingForRAWINPUTController(guid);
+            } else if (SDL_IsJoystickWGI(guid)) {
+                mapping = SDL_CreateMappingForWGIController(guid);
+            } else if (SDL_IsJoystickVirtual(guid)) {
+                /* We'll pick up a robust mapping in VIRTUAL_JoystickGetGamepadMapping */
 #ifdef __ANDROID__
-        if (!mapping && !SDL_IsJoystickHIDAPI(guid)) {
-            mapping = SDL_CreateMappingForAndroidController(guid);
-        }
+            } else {
+                mapping = SDL_CreateMappingForAndroidController(guid);
 #endif
-        if (!mapping && SDL_IsJoystickHIDAPI(guid)) {
-            mapping = SDL_CreateMappingForHIDAPIController(guid);
-        }
-        if (!mapping && SDL_IsJoystickRAWINPUT(guid)) {
-            mapping = SDL_CreateMappingForRAWINPUTController(guid);
-        }
-        if (!mapping && SDL_IsJoystickWGI(guid)) {
-            mapping = SDL_CreateMappingForWGIController(guid);
+            }
         }
     }
     return mapping;
@@ -1258,6 +1259,11 @@ static ControllerMapping_t *SDL_PrivateGenerateAutomaticControllerMapping(const 
     SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "dpdown", &raw_map->dpdown);
     SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "dpleft", &raw_map->dpleft);
     SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "dpright", &raw_map->dpright);
+    SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "misc1", &raw_map->misc1);
+    SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "paddle1", &raw_map->paddle1);
+    SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "paddle2", &raw_map->paddle2);
+    SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "paddle3", &raw_map->paddle3);
+    SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "paddle4", &raw_map->paddle4);
     SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "leftx", &raw_map->leftx);
     SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "lefty", &raw_map->lefty);
     SDL_PrivateAppendToMappingString(mapping, sizeof(mapping), "rightx", &raw_map->rightx);
