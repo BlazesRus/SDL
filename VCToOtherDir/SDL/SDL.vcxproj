@@ -34,22 +34,22 @@
   </PropertyGroup>
   <!--Make sure using latest Windows Kit installed-->
   <Choose>
-    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\d3d12.h'">
+    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\d3d12.h')">
       <PropertyGroup>
 		<WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\'))</WindowsKitDir>
       </PropertyGroup>
 	</When>
-    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\d3d12.h'">
+    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\d3d12.h')">
       <PropertyGroup>
 		<WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\'))</WindowsKitDir>
       </PropertyGroup>
 	</When>
-    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\d3d12.h'">
+    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\d3d12.h')">
       <PropertyGroup>
 		<WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\'))</WindowsKitDir>
       </PropertyGroup>
 	</When>
-    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\d3d12.h'">
+    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\d3d12.h')">
       <PropertyGroup>
 		<WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\'))</WindowsKitDir>
       </PropertyGroup>
