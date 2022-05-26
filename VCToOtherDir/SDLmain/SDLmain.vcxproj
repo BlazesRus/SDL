@@ -27,9 +27,9 @@
   <PropertyGroup Label="UserMacros">
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\'))</RootDirectory>
     <ParentOfSDL>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfSDL>
+    <CStandardType>Modern</CStandardType>
     <SDLOutputDir Condition="'$(CStandardType)' == 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2\'))</SDLOutputDir>
     <SDLOutputDir Condition="'$(CStandardType)' != 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2VC\'))</SDLOutputDir>
-    <CStandardType>Modern</CStandardType>
   </PropertyGroup>
   <!--Make sure using latest Windows Kit installed-->
   <Choose>
