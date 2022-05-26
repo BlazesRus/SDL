@@ -183,3 +183,5 @@ debian/tmp/
 *.log
 
 VCToOtherDir/SDL/ObjectFiles/SDL2/Release_Win32/
+
+VCToOtherDir/SDLmain/ObjectFiles/SDL2main/Release_Win32/
