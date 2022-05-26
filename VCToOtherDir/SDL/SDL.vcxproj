@@ -24,10 +24,11 @@
     <RootNamespace>SDL</RootNamespace>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Label="UserMacros">
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\'))</RootDirectory>
-	<ParentOfSDL>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfSDL>
+    <ParentOfSDL>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfSDL>
     <SDLOutputDir Condition="'$(CStandardType)' == 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2\'))</SDLOutputDir>
     <SDLOutputDir Condition="'$(CStandardType)' != 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2VC\'))</SDLOutputDir>
     <CStandardType>Modern</CStandardType>
@@ -36,31 +37,31 @@
   <Choose>
     <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\d3d12.h')">
       <PropertyGroup>
-		<WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\'))</WindowsKitDir>
+        <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\'))</WindowsKitDir>
       </PropertyGroup>
-	</When>
+    </When>
     <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\d3d12.h')">
       <PropertyGroup>
-		<WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\'))</WindowsKitDir>
+        <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\'))</WindowsKitDir>
       </PropertyGroup>
-	</When>
+    </When>
     <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\d3d12.h')">
       <PropertyGroup>
-		<WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\'))</WindowsKitDir>
+        <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\'))</WindowsKitDir>
       </PropertyGroup>
-	</When>
+    </When>
     <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\d3d12.h')">
       <PropertyGroup>
-		<WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\'))</WindowsKitDir>
+        <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\'))</WindowsKitDir>
       </PropertyGroup>
-	</When>
-	<!--Use old DirectXSDK only as last resort,otherwise use includes from Windows SDK Kit-->
-	<!--DirectX 12 SDK libraries are system libraries (d3d12.lib, dxgi.lib, d3dcompiler.lib, and dxguid.lib)-->
-	<!--     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath> -->
+    </When>
+    <!--Use old DirectXSDK only as last resort,otherwise use includes from Windows SDK Kit-->
+    <!--DirectX 12 SDK libraries are system libraries (d3d12.lib, dxgi.lib, d3dcompiler.lib, and dxguid.lib)-->
+    <!--     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath> -->
   </Choose>
   <PropertyGroup Label="ToolsetOptions">
     <!-- 142 for VS2019(Default);143 for VS2022-->
-  	<PlatformToolset Condition="'$(CStandardType)' == 'ClangToolset'">ClangCL</PlatformToolset>
+    <PlatformToolset Condition="'$(CStandardType)' == 'ClangToolset'">ClangCL</PlatformToolset>
     <PlatformToolset Condition="'$(CStandardType)' != 'ClangToolset' And '$(DefaultPlatformToolset)' != ''">$(DefaultPlatformToolset)</PlatformToolset>
     <PlatformToolset Condition="'$(CStandardType)' != 'ClangToolset' And '$(DefaultPlatformToolset)' == '' And '$(VisualStudioVersion)' != '17'">v142</PlatformToolset>
     <PlatformToolset Condition="'$(CStandardType)' != 'ClangToolset' And '$(DefaultPlatformToolset)' == '' And '$(VisualStudioVersion)' == '17'">v143</PlatformToolset>
@@ -105,7 +106,7 @@
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <OmitDefaultLibName>true</OmitDefaultLibName>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard_C Condition="'$(CStandardType)'=='ClangToolset'">stdc20</LanguageStandard_C>
+      <LanguageStandard_C Condition="'$(CStandardType)'=='ClangToolset'">stdc17</LanguageStandard_C>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -139,7 +140,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <OmitDefaultLibName>true</OmitDefaultLibName>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard_C Condition="'$(CStandardType)'=='ClangToolset'">stdc20</LanguageStandard_C>
+      <LanguageStandard_C Condition="'$(CStandardType)'=='ClangToolset'">stdc17</LanguageStandard_C>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>

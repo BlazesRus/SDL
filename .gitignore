@@ -179,3 +179,7 @@ debian/libsdl*/
 debian/tmp/
 
 **.cbproj.local
+
+*.log
+
+VCToOtherDir/SDL/ObjectFiles/SDL2/Release_Win32/
