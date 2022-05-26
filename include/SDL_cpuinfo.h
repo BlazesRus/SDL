@@ -61,10 +61,10 @@ _m_prefetch(void *__P)
 #define __SSE__
 #endif
 //SIMS 2 and SIMS 3 code doesn't work in C99 standard 
-#if !defined(__SSE2__) && (!defined(UsingClangToolset)||!defined(__clang__)||!defined(BCC_IDE))
+#if !defined(__SSE2__) && !defined(UsingClangToolset)&&!defined(__clang__)&&!defined(BCC_IDE)
 #define __SSE2__
 #endif
-#if !defined(__SSE3__) && (!defined(UsingClangToolset)||!defined(__clang__)||!defined(BCC_IDE))
+#if !defined(__SSE3__) && !defined(UsingClangToolset)&&!defined(__clang__)&&!defined(BCC_IDE)
 #define __SSE3__
 #endif
 #elif defined(__MINGW64_VERSION_MAJOR)
