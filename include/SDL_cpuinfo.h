@@ -60,11 +60,11 @@ _m_prefetch(void *__P)
 #ifndef __SSE__
 #define __SSE__
 #endif
-//Code needs changed in order to enable while compiled as C99 code
-#if !defined(__SSE2__) && !defined(UsingClangToolset)
+//SIMS 2 and SIMS 3 code doesn't work in C99 standard 
+#if !defined(__SSE2__) && (!defined(UsingClangToolset)||!defined(__clang__))
 #define __SSE2__
 #endif
-#if !defined(__SSE3__) && !defined(UsingClangToolset)
+#if !defined(__SSE3__) && (!defined(UsingClangToolset)||!defined(__clang__))
 #define __SSE3__
 #endif
 #elif defined(__MINGW64_VERSION_MAJOR)
