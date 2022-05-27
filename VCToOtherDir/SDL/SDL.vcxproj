@@ -17,6 +17,14 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseC99|Win32">
+      <Configuration>ReleaseC99</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseC99|x64">
+      <Configuration>ReleaseC99</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>SDL2</ProjectName>
@@ -29,12 +37,12 @@
   <PropertyGroup Label="UserMacros">
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\'))</RootDirectory>
     <ParentOfSDL>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfSDL>
-    <CStandardType>Modern</CStandardType>
+    <CStandardType Condition="'$(Configuration)'=='ReleaseC99'">ClangToolset</CStandardType><!--CStandardType of Modern Assumed if not set-->
     <SDLOutputDir Condition="'$(CStandardType)' == 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2\'))</SDLOutputDir>
     <SDLOutputDir Condition="'$(CStandardType)' != 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2VC\'))</SDLOutputDir>
   </PropertyGroup>
   <!--Make sure using latest Windows Kit installed-->
-  <Choose>
+<!--   <Choose>
     <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\d3d12.h')">
       <PropertyGroup>
         <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\'))</WindowsKitDir>
@@ -55,10 +63,8 @@
         <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\'))</WindowsKitDir>
       </PropertyGroup>
     </When>
-    <!--Use old DirectXSDK only as last resort,otherwise use includes from Windows SDK Kit-->
-    <!--DirectX 12 SDK libraries are system libraries (d3d12.lib, dxgi.lib, d3dcompiler.lib, and dxguid.lib)-->
-    <!--     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath> -->
-  </Choose>
+  </Choose> -->
+  <!--DirectX 12 SDK libraries are system libraries (d3d12.lib, dxgi.lib, d3dcompiler.lib, and dxguid.lib)-->
   <PropertyGroup Label="ToolsetOptions">
     <!-- 142 for VS2019(Default);143 for VS2022-->
     <PlatformToolset Condition="'$(CStandardType)' == 'ClangToolset'">ClangCL</PlatformToolset>
