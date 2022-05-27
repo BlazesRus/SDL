@@ -45,12 +45,12 @@
   <Choose>
     <When Condition="'$(Configuration)' == 'Debug'">
       <PropertyGroup>
-          <ConfigurationType>Debug</ConfigurationType>
+          <ConfigurationStyle>Debug</ConfigurationStyle>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup>
-          <ConfigurationType>Release</ConfigurationType>
+          <ConfigurationStyle>Release</ConfigurationStyle>
       </PropertyGroup>
     </Otherwise>
   </Choose>
@@ -137,7 +137,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='Release'">
+  <ItemDefinitionGroup Condition="'$(ConfigurationStyle)'=='Release'">
     <PreBuildEvent>
       <Command>
       </Command>

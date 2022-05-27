@@ -43,12 +43,12 @@
   <Choose>
     <When Condition="'$(Configuration)' == 'Debug'">
       <PropertyGroup>
-          <ConfigurationType>Debug</ConfigurationType>
+          <ConfigurationStyle>Debug</ConfigurationStyle>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup>
-          <ConfigurationType>Release</ConfigurationType>
+          <ConfigurationStyle>Release</ConfigurationStyle>
       </PropertyGroup>
     </Otherwise>
   </Choose>
@@ -99,7 +99,7 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='Release'">
+  <ItemDefinitionGroup Condition="'$(ConfigurationStyle)'=='Release'">
     <PreBuildEvent>
       <Command>
       </Command>
