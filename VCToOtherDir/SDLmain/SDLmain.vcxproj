@@ -36,8 +36,9 @@
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\'))</RootDirectory>
     <ParentOfSDL>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfSDL>
     <CStandardType Condition="'$(Configuration)'=='ReleaseC99'">ClangToolset</CStandardType><!--CStandardType of Modern Assumed if not set-->
-    <SDLOutputDir Condition="'$(CStandardType)' == 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2\'))</SDLOutputDir>
-    <SDLOutputDir Condition="'$(CStandardType)' != 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2VC\'))</SDLOutputDir>
+    <SDLOutputDir>$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2VC\'))</SDLOutputDir>
+    <SDLLibDir Condition="'$(Configuration)' != 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\'))</SDLLibDir>
+    <SDLLibDir Condition="'$(Configuration)' == 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)Clang$(Platform)\'))</SDLLibDir>
   </PropertyGroup>
   <!--Make sure using latest Windows Kit installed-->
 <!--   <Choose>
@@ -66,9 +67,8 @@
   <PropertyGroup Label="ToolsetOptions">
     <!-- 142 for VS2019(Default);143 for VS2022-->
     <PlatformToolset Condition="'$(CStandardType)' == 'ClangToolset'">ClangCL</PlatformToolset>
-    <PlatformToolset Condition="'$(CStandardType)' != 'ClangToolset' And '$(DefaultPlatformToolset)' != ''">$(DefaultPlatformToolset)</PlatformToolset>
-    <PlatformToolset Condition="'$(CStandardType)' != 'ClangToolset' And '$(DefaultPlatformToolset)' == '' And '$(VisualStudioVersion)' != '17'">v142</PlatformToolset>
-    <PlatformToolset Condition="'$(CStandardType)' != 'ClangToolset' And '$(DefaultPlatformToolset)' == '' And '$(VisualStudioVersion)' == '17'">v143</PlatformToolset>
+    <PlatformToolset Condition="'$(Configuration)' != 'ReleaseC99' And '$(VisualStudioVersion)' != '17'">v142</PlatformToolset>
+    <PlatformToolset Condition="'$(Configuration)' != 'ReleaseC99' And '$(VisualStudioVersion)' == '17'">v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="GlobalsPart2">
@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Label="OutputInfo">
     <_ProjectFileVersion>10.0.40219.BlazesRus</_ProjectFileVersion>
-    <OutDir>$(SDLOutputDir)$(Platform)\</OutDir>
+    <OutDir>$(SDLLibDir)</OutDir>
     <IntDir>.\ObjectFiles\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
