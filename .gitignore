@@ -185,3 +185,5 @@ debian/tmp/
 VCToOtherDir/SDL/ObjectFiles/SDL2/Release_Win32/
 
 VCToOtherDir/SDLmain/ObjectFiles/SDL2main/Release_Win32/
+
+VCToOtherDir/SDL/ObjectFiles/SDL2/ReleaseC99_Win32/
