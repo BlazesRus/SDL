@@ -38,7 +38,7 @@
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\'))</RootDirectory>
     <ParentOfSDL>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfSDL>
     <CStandardType Condition="'$(Configuration)'=='ReleaseC99'">ClangToolset</CStandardType><!--CStandardType of Modern Assumed if not set-->
-    <SDLOutputDir>$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangeriaCoop\src\_SDL2VC\'))</SDLOutputDir>
+    <SDLOutputDir>$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangariaCoop\src\_SDL2VC\'))</SDLOutputDir>
     <SDLLibDir Condition="'$(Configuration)' != 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\'))</SDLLibDir>
     <SDLLibDir Condition="'$(Configuration)' == 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)Clang$(Platform)\'))</SDLLibDir>
   </PropertyGroup>
