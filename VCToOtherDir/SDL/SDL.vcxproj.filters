@@ -824,6 +824,7 @@
     <ClInclude Include="..\..\src\SDL_internal.h" />
     <ClInclude Include="..\..\src\SDL_log_c.h" />
     <ClInclude Include="..\..\src\hidapi\SDL_hidapi_c.h" />
+    <ClInclude Include="..\..\src\main\windows\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\audio\wasapi\SDL_wasapi.c" />

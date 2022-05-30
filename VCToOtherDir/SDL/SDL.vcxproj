@@ -37,25 +37,30 @@
   <PropertyGroup Label="UserMacros">
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\'))</RootDirectory>
     <ParentOfSDL>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfSDL>
-    <CStandardType Condition="'$(Configuration)'=='ReleaseC99'">ClangToolset</CStandardType><!--CStandardType of Modern Assumed if not set-->
+    <CStandardType Condition="'$(Configuration)'=='ReleaseC99'">ClangToolset</CStandardType>
+    <!--CStandardType of Modern Assumed if not set-->
     <SDLOutputDir>$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangariaCoop\src\_SDL2VC\'))</SDLOutputDir>
-    <SDLLibDir Condition="'$(Configuration)' != 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\'))</SDLLibDir>
-    <SDLLibDir Condition="'$(Configuration)' == 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)Clang$(Platform)\'))</SDLLibDir>
+	<UserProjectSettingsFile>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)SDL.vcxproj.user'))</UserProjectSettingsFile>
+  </PropertyGroup>
+  <Import Project="$(UserProjectSettingsFile)" Condition="exists('$(UserProjectSettingsFile)')" />
+  <PropertyGroup>
+    <SDLLibDir Condition="'$(SDLLibDir)' == '' And '$(Configuration)' != 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\'))</SDLLibDir>
+    <SDLLibDir Condition="'$(SDLLibDir)' == '' And '$(Configuration)' == 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)Clang$(Platform)\'))</SDLLibDir>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(Configuration)' == 'Debug'">
       <PropertyGroup>
-          <ConfigurationStyle>Debug</ConfigurationStyle>
+        <ConfigurationStyle>Debug</ConfigurationStyle>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup>
-          <ConfigurationStyle>Release</ConfigurationStyle>
+        <ConfigurationStyle>Release</ConfigurationStyle>
       </PropertyGroup>
     </Otherwise>
   </Choose>
   <!--Make sure using latest Windows Kit installed-->
-<!--   <Choose>
+  <!--   <Choose>
     <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\d3d12.h')">
       <PropertyGroup>
         <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\'))</WindowsKitDir>
@@ -305,6 +310,7 @@
     <ClInclude Include="..\..\src\libm\math_libm.h" />
     <ClInclude Include="..\..\src\libm\math_private.h" />
     <ClInclude Include="..\..\src\locale\SDL_syslocale.h" />
+    <ClInclude Include="..\..\src\main\windows\resource.h" />
     <ClInclude Include="..\..\src\misc\SDL_sysurl.h" />
     <ClInclude Include="..\..\src\power\SDL_syspower.h" />
     <ClInclude Include="..\..\src\render\direct3d11\SDL_shaders_d3d11.h" />
