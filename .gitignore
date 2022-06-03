@@ -182,12 +182,8 @@ debian/tmp/
 
 *.log
 
-VCToOtherDir/SDL/ObjectFiles/SDL2/Release_Win32/
+VCToOtherDir/SDL/ObjectFiles/**
+VisualC/SDL/ObjectFiles/**
+VisualC/*/ObjectFiles/**
 
-VCToOtherDir/SDLmain/ObjectFiles/SDL2main/Release_Win32/
-
-VCToOtherDir/SDL/ObjectFiles/SDL2/ReleaseC99_Win32/
-
-VCToOtherDir/SDL/ObjectFiles/SDL2/Release_x64/
-
-VCToOtherDir/SDLmain/ObjectFiles/SDL2main/Release_x64/
+*.tlog

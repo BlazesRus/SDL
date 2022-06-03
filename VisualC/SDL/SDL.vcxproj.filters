@@ -489,9 +489,6 @@
     <ClInclude Include="..\..\src\haptic\SDL_haptic_c.h">
       <Filter>haptic</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\hidapi\SDL_hidapi.h">
-      <Filter>hidapi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\hidapi\SDL_hidapi_c.h">
       <Filter>hidapi</Filter>
     </ClInclude>

@@ -37,10 +37,11 @@
   <PropertyGroup Label="UserMacros">
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\'))</RootDirectory>
     <ParentOfSDL>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfSDL>
+    <SDLIncludes>$([System.IO.Path]::GetFullPath('$(RootDirectory)\include\'))</SDLIncludes>
     <CStandardType Condition="'$(Configuration)'=='ReleaseC99'">ClangToolset</CStandardType>
     <!--CStandardType of Modern Assumed if not set-->
     <SDLOutputDir>$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangariaCoop\src\_SDL2VC\'))</SDLOutputDir>
-	<UserProjectSettingsFile>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)SDL.vcxproj.user'))</UserProjectSettingsFile>
+    <UserProjectSettingsFile>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)SDL.vcxproj.user'))</UserProjectSettingsFile>
   </PropertyGroup>
   <Import Project="$(UserProjectSettingsFile)" Condition="exists('$(UserProjectSettingsFile)')" />
   <PropertyGroup>
@@ -105,11 +106,13 @@
     <_ProjectFileVersion>10.0.40219.BlazesRus</_ProjectFileVersion>
     <OutDir>$(SDLLibDir)</OutDir>
     <IntDir>.\ObjectFiles\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
+	<PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy  "$(SDLIncludes)" "$(SDLOutputDir)" /s /e /y /d</Command>
+      <Message>Updating SDL Includes in Source of Game</Message>
     </PreBuildEvent>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -144,8 +147,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(ConfigurationStyle)'=='Release'">
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy  "$(SDLIncludes)" "$(SDLOutputDir)" /s /e /y /d</Command>
+      <Message>Updating SDL Includes in Source of Game</Message>
     </PreBuildEvent>
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
