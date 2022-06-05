@@ -111,7 +111,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <PreBuildEvent>
-      <Command>xcopy  "$(SDLIncludes)" "$(SDLOutputDir)" /s /e /y /d</Command>
+      <Command>xcopy  "$(SDLIncludes)" "$(SDLOutputDir)" *.h /y /d</Command>
       <Message>Updating SDL Includes in Source of Game</Message>
     </PreBuildEvent>
     <Midl>
@@ -147,7 +147,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(ConfigurationStyle)'=='Release'">
     <PreBuildEvent>
-      <Command>xcopy  "$(SDLIncludes)" "$(SDLOutputDir)" /s /e /y /d</Command>
+      <Command>xcopy  "$(SDLIncludes)" "$(SDLOutputDir)" *.h /y /d</Command>
       <Message>Updating SDL Includes in Source of Game</Message>
     </PreBuildEvent>
     <Midl>
