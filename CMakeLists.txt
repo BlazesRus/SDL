@@ -56,6 +56,13 @@ set(CMAKE_MODULE_PATH "${SDL2_SOURCE_DIR}/cmake")
 include(${SDL2_SOURCE_DIR}/cmake/macros.cmake)
 include(${SDL2_SOURCE_DIR}/cmake/sdlchecks.cmake)
 
+# Enable large file support on 32-bit glibc, so that we can access files
+# with large inode numbers
+check_symbol_exists("__GLIBC__" "stdlib.h" LIBC_IS_GLIBC)
+if (LIBC_IS_GLIBC AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+    add_compile_definitions(PRIVATE _FILE_OFFSET_BITS=64)
+endif()
+
 # See docs/release_checklist.md
 set(SDL_MAJOR_VERSION 2)
 set(SDL_MINOR_VERSION 23)
@@ -476,7 +483,12 @@ set(SDL_SHARED ${SDL_SHARED_ENABLED_BY_DEFAULT} CACHE BOOL "Build a shared versi
 set(SDL_STATIC ${SDL_STATIC_ENABLED_BY_DEFAULT} CACHE BOOL "Build a static version of the library")
 set(SDL_TEST   ${SDL_TEST_ENABLED_BY_DEFAULT} CACHE BOOL "Build the SDL2_test library")
 
-dep_option(SDL_STATIC_PIC      "Static version of the library should be built with Position Independent Code" OFF "SDL_STATIC" OFF)
+# Some platforms have CMAKE_POSITION_INDEPENDENT_CODE not defined
+if(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+  set(CMAKE_POSITION_INDEPENDENT_CODE FALSE)
+endif()
+
+dep_option(SDL_STATIC_PIC      "Static version of the library should be built with Position Independent Code" "${CMAKE_POSITION_INDEPENDENT_CODE}" "SDL_STATIC" OFF)
 dep_option(SDL_TESTS           "Build the test directory" OFF SDL_TEST OFF)
 set_option(SDL_INSTALL_TESTS   "Install test-cases" OFF)
 
@@ -2697,6 +2709,7 @@ configure_file("${SDL2_SOURCE_DIR}/include/SDL_revision.h.cmake"
 if(NOT WINDOWS OR CYGWIN OR MINGW)
 
   set(prefix ${CMAKE_INSTALL_PREFIX})
+  file(RELATIVE_PATH bin_prefix_relpath "${CMAKE_INSTALL_FULL_BINDIR}" "${CMAKE_INSTALL_PREFIX}")
 
   set(exec_prefix "\${prefix}")
   set(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")

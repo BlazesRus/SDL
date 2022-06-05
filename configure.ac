@@ -60,6 +60,7 @@ dnl AC_CANONICAL_HOST
 dnl Check for tools
 AC_PROG_CC
 AC_PROG_CXX
+AC_SYS_LARGEFILE
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 PKG_PROG_PKG_CONFIG
@@ -4693,6 +4694,11 @@ eval pkg_prefix=$prefix
 eval pkg_cmakedir=$libdir/cmake/SDL2
 cmake_prefix_relpath="$(echo -n "$pkg_cmakedir" | sed -E "s#^$pkg_prefix##" | sed -E "s#[A-Za-z0-9_ .-]+#..#g" )"
 AC_SUBST([cmake_prefix_relpath])
+
+dnl Calculate the location of the prefix, relative to bindir
+eval pkg_bindir=$bindir
+bin_prefix_relpath="$(echo -n "pkg_bindir" | sed -E "s#^$pkg_prefix##" | sed -E "s#[A-Za-z0-9_ .-]+#..#g" )"
+AC_SUBST([bin_prefix_relpath])
 
 dnl Expand the cflags and libraries needed by apps using SDL
 AC_SUBST(SDL_CFLAGS)

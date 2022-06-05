@@ -867,3 +867,7 @@
 #define SDL_JoystickPathForIndex SDL_JoystickPathForIndex_REAL
 #define SDL_JoystickPath SDL_JoystickPath_REAL
 #define SDL_JoystickAttachVirtualEx SDL_JoystickAttachVirtualEx_REAL
+#define SDL_GameControllerGetFirmwareVersion SDL_GameControllerGetFirmwareVersion_REAL
+#define SDL_JoystickGetFirmwareVersion SDL_JoystickGetFirmwareVersion_REAL
+#define SDL_GUIDToString SDL_GUIDToString_REAL
+#define SDL_GUIDFromString SDL_GUIDFromString_REAL
