@@ -38,15 +38,13 @@
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\'))</RootDirectory>
     <ParentOfSDL>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfSDL>
     <SDLIncludes>$([System.IO.Path]::GetFullPath('$(RootDirectory)\include\'))</SDLIncludes>
-    <CStandardType Condition="'$(Configuration)'=='ReleaseC99'">ClangToolset</CStandardType>
-    <!--CStandardType of Modern Assumed if not set-->
     <SDLOutputDir>$([System.IO.Path]::GetFullPath('$(ParentOfSDL)TangariaCoop\src\_SDL2VC\'))</SDLOutputDir>
     <UserProjectSettingsFile>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)SDL.vcxproj.user'))</UserProjectSettingsFile>
   </PropertyGroup>
   <Import Project="$(UserProjectSettingsFile)" Condition="exists('$(UserProjectSettingsFile)')" />
   <PropertyGroup>
-    <SDLLibDir Condition="'$(SDLLibDir)' == '' And '$(Configuration)' != 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\'))</SDLLibDir>
-    <SDLLibDir Condition="'$(SDLLibDir)' == '' And '$(Configuration)' == 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)Clang$(Platform)\'))</SDLLibDir>
+    <SDLLibDir Condition="'$(SDLLibDir)' == '' And '$(PlatformToolset)'!='ClangCL'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\'))</SDLLibDir>
+    <SDLLibDir Condition="'$(SDLLibDir)' == '' And '$(PlatformToolset)'=='ClangCL'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)Clang$(Platform)\'))</SDLLibDir>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(Configuration)' == 'Debug'">
@@ -60,35 +58,11 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
-  <!--Make sure using latest Windows Kit installed-->
-  <!--   <Choose>
-    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\d3d12.h')">
-      <PropertyGroup>
-        <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\'))</WindowsKitDir>
-      </PropertyGroup>
-    </When>
-    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\d3d12.h')">
-      <PropertyGroup>
-        <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\'))</WindowsKitDir>
-      </PropertyGroup>
-    </When>
-    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\d3d12.h')">
-      <PropertyGroup>
-        <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\'))</WindowsKitDir>
-      </PropertyGroup>
-    </When>
-    <When Condition="Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\d3d12.h')">
-      <PropertyGroup>
-        <WindowsKitDir>$([System.IO.Path]::GetFullPath('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\'))</WindowsKitDir>
-      </PropertyGroup>
-    </When>
-  </Choose> -->
-  <!--DirectX 12 SDK libraries are system libraries (d3d12.lib, dxgi.lib, d3dcompiler.lib, and dxguid.lib)-->
   <PropertyGroup Label="ToolsetOptions">
     <!-- 142 for VS2019(Default);143 for VS2022-->
-    <PlatformToolset Condition="'$(CStandardType)' == 'ClangToolset'">ClangCL</PlatformToolset>
-    <PlatformToolset Condition="'$(Configuration)' != 'ReleaseC99' And '$(VisualStudioVersion)' != '17'">v142</PlatformToolset>
-    <PlatformToolset Condition="'$(Configuration)' != 'ReleaseC99' And '$(VisualStudioVersion)' == '17'">v143</PlatformToolset>
+    <PlatformToolset Condition="'$(Configuration)' == 'ReleaseC99' Or '$(Configuration)' == 'DebugC99'">ClangCL</PlatformToolset>
+    <PlatformToolset Condition="'$(PlatformToolset)'!='ClangCL' And '$(VisualStudioVersion)' != '17'">v142</PlatformToolset>
+    <PlatformToolset Condition="'$(PlatformToolset)'!='ClangCL' And '$(VisualStudioVersion)' == '17'">v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="GlobalsPart2">
@@ -111,7 +85,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <PreBuildEvent>
-      <Command>xcopy  "$(SDLIncludes)" "$(SDLOutputDir)" *.h /y /d</Command>
+      <Command>xcopy  "$(SDLIncludes)*.h" "$(SDLOutputDir)" /y /d</Command>
       <Message>Updating SDL Includes in Source of Game</Message>
     </PreBuildEvent>
     <Midl>
@@ -126,14 +100,14 @@
       <AdditionalIncludeDirectories>$(ProjectDir)/../../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <PreprocessorDefinitions>DLL_EXPORT;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(CStandardType)'=='ClangToolset'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(PlatformToolset)'=='ClangCL'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <OmitDefaultLibName>true</OmitDefaultLibName>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard_C Condition="'$(CStandardType)'=='ClangToolset'">stdc17</LanguageStandard_C>
+      <LanguageStandard_C Condition="'$(PlatformToolset)'=='ClangCL'">stdc17</LanguageStandard_C>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -147,7 +121,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(ConfigurationStyle)'=='Release'">
     <PreBuildEvent>
-      <Command>xcopy  "$(SDLIncludes)" "$(SDLOutputDir)" *.h /y /d</Command>
+      <Command>xcopy  "$(SDLIncludes)*.h" "$(SDLOutputDir)" /y /d</Command>
       <Message>Updating SDL Includes in Source of Game</Message>
     </PreBuildEvent>
     <Midl>
@@ -161,14 +135,14 @@
       <AdditionalIncludeDirectories>$(ProjectDir)/../../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <PreprocessorDefinitions>DLL_EXPORT;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(CStandardType)'=='ClangToolset'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(PlatformToolset)'=='ClangCL'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <OmitDefaultLibName>true</OmitDefaultLibName>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard_C Condition="'$(CStandardType)'=='ClangToolset'">stdc17</LanguageStandard_C>
+      <LanguageStandard_C Condition="'$(PlatformToolset)'=='ClangCL'">stdc17</LanguageStandard_C>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
